@@ -51,13 +51,20 @@ class OlympicWinnersService {
     async getPivotValues(pivotCols) {
         if (!pivotCols || pivotCols.length === 0) return {};
 
-        const pivotValues = {};
-        for (const pivotCol of pivotCols) {
-            const query = `SELECT DISTINCT ${pivotCol.field} FROM Financiero.ViewLoteDetalle`;
-            const result = await sql.query(query);
-            pivotValues[pivotCol.field] = result.recordset.map(row => row[pivotCol.field]);
-        }
-        return pivotValues;
+        const distinctCols = pivotCols.reduce((prev, item) => prev.concat(item.field) , []).join(', ');
+        const query = `SELECT DISTINCT ${distinctCols} FROM Financiero.ViewLoteDetalle`;
+        const result = await sql.query(query);
+        return result.recordset;
+
+        // if (!pivotCols || pivotCols.length === 0) return {};
+
+        // const pivotValues = {};
+        // for (const pivotCol of pivotCols) {
+        //     const query = `SELECT DISTINCT ${pivotCol.field} FROM Financiero.ViewLoteDetalle`;
+        //     const result = await sql.query(query);
+        //     pivotValues[pivotCol.field] = result.recordset.map(row => row[pivotCol.field]);
+        // }
+        // return pivotValues;
     }
 
     buildSql(request, pivotValues) {
@@ -343,6 +350,7 @@ class OlympicWinnersService {
 
     getPivotFields(results, pivotValues, valueCols) {
         const pivotFields = [];
+        console.log(pivotValues, valueCols, '_NOR_');
         Object.entries(pivotValues).forEach(([pivotField, values]) => {
             values.forEach(value => {
                 valueCols.forEach(valueCol => {
